@@ -12,6 +12,7 @@ A cross-platform warehouse management application built with .NET MAUI and Blazo
 - **Form Validation** - DataAnnotations-based validation for inventory items with client-side and server-side validation
 - **Connection Resilience** - Automatic reconnection handling for SignalR connections with user-friendly modal dialogs
 - **State Persistence** - .NET 10 PersistentState feature for seamless server-to-client state handoff
+- **Platform-Aware SignalR** - Intelligent URL resolution for development and production across iOS, MacCatalyst, and Web platforms
 
 ## 🏗️ Architecture
 
@@ -39,6 +40,8 @@ SignalR `InventoryHub` enables real-time inventory updates:
 
 - Clients connect to the hub for bidirectional communication
 - Inventory changes are broadcast to all connected clients (excluding the sender)
+- Platform-aware URL resolution handles development and production scenarios
+- Connection lifecycle management prevents duplicate initializations
 - Automatic reconnection handling ensures reliable connectivity
 
 ### Platform-Specific Implementations
@@ -48,6 +51,12 @@ The application uses abstraction patterns for platform-specific features:
 - **Barcode Scanning**: `IBarcodeScanner` interface with implementations:
   - `MobileBarcodeScanner` - Mobile platform implementation
   - `WebBarcodeScanner` - Web platform implementation using JavaScript interop
+
+- **SignalR URL Resolution**: `HubUrlHelper` utility handles cross-platform URL resolution:
+  - Automatically detects development vs production environments
+  - Resolves localhost addresses for iOS Simulator and MacCatalyst
+  - Handles port detection and scheme preservation (HTTP/HTTPS)
+  - Supports both web and mobile platforms seamlessly
 
 ### .NET 10 Features
 
@@ -70,6 +79,7 @@ graph TB
         Components["Blazor Components<br/>ItemEditor.razor"]
         Models["Data Models<br/>InventoryItem.cs"]
         Interfaces["Service Interfaces<br/>IBarcodeScanner"]
+        Helpers["Utility Services<br/>HubUrlHelper"]
     end
     
     subgraph Services["Platform Services"]
@@ -86,11 +96,13 @@ graph TB
     Web --> Components
     Components --> Models
     Components --> Interfaces
+    Components --> Helpers
     Interfaces --> MobileScanner
     Interfaces --> WebScanner
     Mobile --> MobileScanner
     Web --> WebScanner
     Components --> Hub
+    Helpers --> Hub
     Hub --> Mobile
     Hub --> Web
     Web --> WebApp
@@ -198,7 +210,8 @@ SmartWarehouse/
 │   ├── Models/                     # Data models
 │   │   └── InventoryItem.cs        # Inventory item model with validation
 │   ├── Services/                   # Shared services/interfaces
-│   │   └── IBarcodeScanner.cs      # Barcode scanning abstraction interface
+│   │   ├── IBarcodeScanner.cs      # Barcode scanning abstraction interface
+│   │   └── HubUrlHelper.cs         # Cross-platform SignalR URL resolution utility
 │   └── SmartWarehouse.Shared.csproj
 │
 ├── SmartWarehouse.Web/             # Web application

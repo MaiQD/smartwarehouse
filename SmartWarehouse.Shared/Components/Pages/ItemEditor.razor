@@ -1,9 +1,11 @@
 @page "/item/edit/{Id:guid?}"
 @rendermode InteractiveAuto
+@using Microsoft.AspNetCore.SignalR.Client
 @using SmartWarehouse.Shared.Models
 @using SmartWarehouse.Shared.Services
 
 @inject IBarcodeScanner Scanner
+@inject NavigationManager Nav
 
 <h3>📦 Warehouse Item Editor</h3>
 @if (CurrentItem is null)
@@ -54,17 +56,18 @@ else
     [PersistentState] public InventoryItem? CurrentItem { get; set; } = new();
 
     private string? _lastSavedMessage;
-
+    private HubConnection? _hubConnection;
+    private bool _isInitialized;
+    
     protected override async Task OnInitializedAsync()
     {
         CurrentItem ??= new InventoryItem();
-        // If we already have data (restored from PersistentState), don't fetch again!
+        
         if (CurrentItem.Id != Guid.Empty && !string.IsNullOrEmpty(CurrentItem.Name))
         {
             return;
         }
 
-        // Simulate fetching from a database if an ID is passed
         if (Id.HasValue)
         {
             await Task.Delay(500); // Fake DB latency
@@ -78,9 +81,60 @@ else
         }
     }
 
-    private void HandleSave()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _lastSavedMessage = $"Saved {CurrentItem.Name} (Qty: {CurrentItem.Quantity}) at {DateTime.Now.ToShortTimeString()}";
+        if (!firstRender || _isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = true;
+        await InitializeSignalRAsync();
+    }
+
+    private async Task InitializeSignalRAsync()
+    {
+        if (_hubConnection is not null && 
+            (_hubConnection.State == HubConnectionState.Connected || 
+             _hubConnection.State == HubConnectionState.Connecting))
+        {
+            return;
+        }
+
+        try 
+        {
+            var hubUrl = HubUrlHelper.GetHubUrl(Nav, "/inventoryhub");
+            
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .Build();
+
+            _hubConnection.On<Guid, int>("ReceiveItemUpdate", (itemId, newQty) =>
+            {
+                // Check if the update is for the item we are currently looking at
+                // if (CurrentItem is null || CurrentItem.Id != itemId) return;
+                CurrentItem.Quantity = newQty;
+                    
+                // IMPORTANT: Tell Blazor the UI changed!
+                InvokeAsync(StateHasChanged);
+            });
+
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SignalR Error: {ex.Message}");
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        _lastSavedMessage = $"Saved {CurrentItem?.Name} (Qty: {CurrentItem?.Quantity}) at {DateTime.Now.ToShortTimeString()}";
+        
+        if (_hubConnection is not null && _hubConnection.State == HubConnectionState.Connected)
+        {
+            await _hubConnection.SendAsync("NotifyItemUpdated", CurrentItem?.Id, CurrentItem?.Quantity);
+        }
     }
 
     private async Task ScanSkuAsync()
@@ -92,4 +146,15 @@ else
         }
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            if (_hubConnection.State == HubConnectionState.Connected)
+            {
+                await _hubConnection.StopAsync();
+            }
+            await _hubConnection.DisposeAsync();
+        }
+    }
 }
