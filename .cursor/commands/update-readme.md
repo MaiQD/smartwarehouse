@@ -1,0 +1,1 @@
+Using git and review the code changes and update readme.md with the changes. Don't try to logs what's changed, just update with the architecture and features.

@@ -1,0 +1,95 @@
+@page "/item/edit/{Id:guid?}"
+@rendermode InteractiveAuto
+@using SmartWarehouse.Shared.Models
+@using SmartWarehouse.Shared.Services
+
+@inject IBarcodeScanner Scanner
+
+<h3>📦 Warehouse Item Editor</h3>
+@if (CurrentItem is null)
+{
+    <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Loading...</span>
+    </div>
+}
+else
+{
+    <EditForm Model="@CurrentItem" OnValidSubmit="HandleSave">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <div class="mb-3">
+            <label>Item Name</label>
+            <InputText @bind-Value="CurrentItem.Name" class="form-control"/>
+        </div>
+
+        <div class="mb-3">
+            <label>Quantity</label>
+            <InputNumber @bind-Value="CurrentItem.Quantity" class="form-control"/>
+        </div>
+
+        <div class="mb-3">
+            <label>SKU</label>
+            <InputText @bind-Value="CurrentItem.Sku" class="form-control"/>
+        </div>
+
+        <button type="button" class="btn-secondary btn" @onclick="ScanSkuAsync">Scan Sku</button>
+
+        <button type="submit" class="btn btn-primary">Save Item</button>
+    </EditForm>
+}
+
+@if (_lastSavedMessage is not null)
+{
+    <div class="alert alert-success mt-3">@_lastSavedMessage</div>
+}
+
+@code {
+    [Parameter] public Guid? Id { get; set; }
+
+    // .NET 10 Feature: [PersistentState]
+    // This automatically saves/restores this object during the 
+    // "Server -> Client" handoff. No more double-fetching!
+    [PersistentState] public InventoryItem? CurrentItem { get; set; } = new();
+
+    private string? _lastSavedMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentItem ??= new InventoryItem();
+        // If we already have data (restored from PersistentState), don't fetch again!
+        if (CurrentItem.Id != Guid.Empty && !string.IsNullOrEmpty(CurrentItem.Name))
+        {
+            return;
+        }
+
+        // Simulate fetching from a database if an ID is passed
+        if (Id.HasValue)
+        {
+            await Task.Delay(500); // Fake DB latency
+            CurrentItem = new InventoryItem
+            {
+                Id = Id.Value,
+                Name = "Industrial Drill",
+                Quantity = 50,
+                Sku = "DRILL-2025"
+            };
+        }
+    }
+
+    private void HandleSave()
+    {
+        _lastSavedMessage = $"Saved {CurrentItem.Name} (Qty: {CurrentItem.Quantity}) at {DateTime.Now.ToShortTimeString()}";
+    }
+
+    private async Task ScanSkuAsync()
+    {
+        var code = await Scanner.ScanAsync();
+        if (!string.IsNullOrEmpty(code))
+        {
+            CurrentItem!.Sku = code;
+        }
+    }
+
+}

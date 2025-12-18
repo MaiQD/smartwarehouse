@@ -1,5 +1,7 @@
-using SmartWarehouse.Web.Client.Pages;
 using SmartWarehouse.Web.Components;
+using SmartWarehouse.Web.Hubs;
+using SmartWarehouse.Shared.Services;
+using SmartWarehouse.Web.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddScoped<IBarcodeScanner, WebBarcodeScanner>();
 
 var app = builder.Build();
 
@@ -31,6 +35,8 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(SmartWarehouse.Web.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(SmartWarehouse.Web.Client._Imports).Assembly, typeof(SmartWarehouse.Shared._Imports).Assembly);
+
+app.MapHub<InventoryHub>("/inventoryhub");
 
 app.Run();
