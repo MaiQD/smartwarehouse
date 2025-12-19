@@ -1,4 +1,4 @@
-﻿namespace SmartWarehouse.Mobile;
+﻿namespace SmartWarehouse.MAUI;
 
 public partial class MainPage : ContentPage
 {

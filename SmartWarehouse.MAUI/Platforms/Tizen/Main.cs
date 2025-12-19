@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace SmartWarehouse.Mobile;
+namespace SmartWarehouse.MAUI;
 
 class Program : MauiApplication
 {

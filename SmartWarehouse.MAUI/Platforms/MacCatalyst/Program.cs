@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace SmartWarehouse.Mobile;
+namespace SmartWarehouse.MAUI;
 
 public class Program
 {

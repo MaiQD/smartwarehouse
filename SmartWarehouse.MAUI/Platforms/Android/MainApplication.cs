@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace SmartWarehouse.Mobile;
+namespace SmartWarehouse.MAUI;
 
 [Application]
 public class MainApplication : MauiApplication

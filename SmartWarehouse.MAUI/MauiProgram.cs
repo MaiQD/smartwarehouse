@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using SmartWarehouse.Mobile.Services;
+using SmartWarehouse.MAUI.Services;
 using SmartWarehouse.Shared.Services;
 
-namespace SmartWarehouse.Mobile;
+namespace SmartWarehouse.MAUI;
 
 public static class MauiProgram
 {

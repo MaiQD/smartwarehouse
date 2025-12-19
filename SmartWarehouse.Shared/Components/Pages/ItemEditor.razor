@@ -1,5 +1,4 @@
 @page "/item/edit/{Id:guid?}"
-@rendermode InteractiveAuto
 @using Microsoft.AspNetCore.SignalR.Client
 @using SmartWarehouse.Shared.Models
 @using SmartWarehouse.Shared.Services
@@ -50,10 +49,7 @@ else
 @code {
     [Parameter] public Guid? Id { get; set; }
 
-    // .NET 10 Feature: [PersistentState]
-    // This automatically saves/restores this object during the 
-    // "Server -> Client" handoff. No more double-fetching!
-    [PersistentState] public InventoryItem? CurrentItem { get; set; } = new();
+    public InventoryItem? CurrentItem { get; set; } = new();
 
     private string? _lastSavedMessage;
     private HubConnection? _hubConnection;
@@ -111,8 +107,11 @@ else
 
             _hubConnection.On<Guid, int>("ReceiveItemUpdate", (itemId, newQty) =>
             {
-                // Check if the update is for the item we are currently looking at
-                // if (CurrentItem is null || CurrentItem.Id != itemId) return;
+                if (CurrentItem is null || CurrentItem.Id != itemId)
+                {
+                    return;
+                }
+                
                 CurrentItem.Quantity = newQty;
                     
                 // IMPORTANT: Tell Blazor the UI changed!

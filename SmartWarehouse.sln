@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWarehouse.Web", "Smart
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWarehouse.Web.Client", "SmartWarehouse.Web\SmartWarehouse.Web.Client\SmartWarehouse.Web.Client.csproj", "{6805A9A8-397F-4B16-BF81-A4EDC031FCB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWarehouse.Mobile", "SmartWarehouse.Mobile\SmartWarehouse.Mobile.csproj", "{C8AEF252-6D59-494E-8FED-7BEEECDE68EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWarehouse.MAUI", "SmartWarehouse.MAUI\SmartWarehouse.MAUI.csproj", "{C8AEF252-6D59-494E-8FED-7BEEECDE68EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

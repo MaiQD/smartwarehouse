@@ -1,6 +1,6 @@
 using SmartWarehouse.Shared.Services;
 
-namespace SmartWarehouse.Mobile.Services;
+namespace SmartWarehouse.MAUI.Services;
 
 public class MobileBarcodeScanner: IBarcodeScanner
 {

@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace SmartWarehouse.Mobile;
+namespace SmartWarehouse.MAUI;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
