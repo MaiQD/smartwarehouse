@@ -1,7 +1,4 @@
-﻿@using SmartWarehouse.Shared.Models
-@using SmartWarehouse.Shared.Components.Pages
-
-<Router AppAssembly="@typeof(MauiProgram).Assembly" AdditionalAssemblies="new[] { typeof(ItemEditor).Assembly }">
+﻿<Router AppAssembly="@typeof(MauiProgram).Assembly" AdditionalAssemblies="new[] { typeof(Shared._Imports).Assembly }">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
         <FocusOnNavigate RouteData="@routeData" Selector="h1"/>

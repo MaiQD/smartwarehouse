@@ -49,6 +49,7 @@ else
 @code {
     [Parameter] public Guid? Id { get; set; }
 
+    [PersistentState]
     public InventoryItem? CurrentItem { get; set; } = new();
 
     private string? _lastSavedMessage;
