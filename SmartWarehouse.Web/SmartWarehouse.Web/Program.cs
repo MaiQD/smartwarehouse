@@ -1,7 +1,11 @@
+using FastEndpoints;
+using FastEndpoints.Swagger;
 using SmartWarehouse.Web.Components;
 using SmartWarehouse.Web.Hubs;
 using SmartWarehouse.Shared.Services;
 using SmartWarehouse.Web.Client.Services;
+using SmartWarehouse.Web.Data;
+using SmartWarehouse.Web.Features.Inventory.SaveItem;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +14,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri("http://localhost:5055") });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddFastEndpoints()
+    .AddSwaggerDocument();
+
 builder.Services.AddScoped<IBarcodeScanner, WebBarcodeScanner>();
+builder.Services.AddScoped<IInventoryDataService, ApiInventoryService>();
+builder.Services.AddSingleton<FakeInventoryDb>();
 
 var app = builder.Build();
 
@@ -30,6 +41,9 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.UseFastEndpoints()
+    .UseSwaggerGen();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

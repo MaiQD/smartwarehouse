@@ -14,6 +14,7 @@ public static class MauiProgram
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
         builder.Services.AddScoped<IBarcodeScanner, MobileBarcodeScanner>();
+        builder.Services.AddScoped<IInventoryDataService, LocalInventoryService>();
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

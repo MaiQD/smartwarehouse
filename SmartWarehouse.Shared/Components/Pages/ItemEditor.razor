@@ -5,6 +5,7 @@
 
 @inject IBarcodeScanner Scanner
 @inject NavigationManager Nav
+@inject IInventoryDataService InventoryDataService
 
 <h3>📦 Warehouse Item Editor</h3>
 @if (CurrentItem is null)
@@ -67,14 +68,7 @@ else
 
         if (Id.HasValue)
         {
-            await Task.Delay(500); // Fake DB latency
-            CurrentItem = new InventoryItem
-            {
-                Id = Id.Value,
-                Name = "Industrial Drill",
-                Quantity = 50,
-                Sku = "DRILL-2025"
-            };
+            await InventoryDataService.GetItemByIdAsync(Id.Value);
         }
     }
 

@@ -10,7 +10,15 @@
     <ItemGroup>
         <ProjectReference Include="..\..\SmartWarehouse.Shared\SmartWarehouse.Shared.csproj" />
         <ProjectReference Include="..\SmartWarehouse.Web.Client\SmartWarehouse.Web.Client.csproj"/>
+        <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="7.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Features\Inventory\GetById\GetInventoryItemByIdRequest.cs">
+        <DependentUpon>GetInventoryItemByIdEndpoint.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
