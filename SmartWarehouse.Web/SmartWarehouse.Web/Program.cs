@@ -49,7 +49,9 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(SmartWarehouse.Web.Client._Imports).Assembly, typeof(SmartWarehouse.Shared._Imports).Assembly);
+    .AddAdditionalAssemblies(
+        typeof(SmartWarehouse.Web.Client._Imports).Assembly, 
+        typeof(SmartWarehouse.Shared._Imports).Assembly); // Server assembly for static SSR
 
 app.MapHub<InventoryHub>("/inventoryhub");
 

@@ -5,12 +5,13 @@ A cross-platform warehouse management application built with .NET MAUI and Blazo
 ## 🚀 Features
 
 - **Cross-Platform Mobile App** - Native iOS, Android, MacCatalyst, and Windows applications built with .NET MAUI
-- **Web Application** - Blazor Server and WebAssembly support with interactive render modes
+- **Web Application** - Blazor Web App with InteractiveAuto render mode supporting both Server and WebAssembly modes seamlessly
 - **REST API** - FastEndpoints-based RESTful API with Swagger/OpenAPI documentation
 - **Real-time Inventory Updates** - SignalR hub broadcasts inventory changes to all connected clients in real-time
 - **Platform-Adaptive Barcode Scanning** - Abstracted interface with native mobile and web implementations
 - **Data Service Abstraction** - Unified `IInventoryDataService` interface with platform-specific implementations
 - **Shared UI Components** - Blazor components shared across mobile and web platforms for consistent UX
+- **Optimized Component Architecture** - Components organized across Client, Server, and Shared projects for optimal render mode compatibility
 - **Form Validation** - DataAnnotations-based validation for inventory items with client-side and server-side validation
 - **Connection Resilience** - Automatic reconnection handling for SignalR connections with user-friendly modal dialogs
 - **State Persistence** - .NET 10 PersistentState feature for seamless server-to-client state handoff
@@ -30,11 +31,20 @@ The application consists of three main projects:
 
 ### Component Model
 
-The shared component model allows UI components to be written once and run on both mobile and web platforms:
+The application uses a three-tier component architecture optimized for Blazor Web App with InteractiveAuto render mode:
 
-- **Shared Blazor Components** - Components in `SmartWarehouse.Shared/Components` are used across all platforms
+- **Shared Components** - Components in `SmartWarehouse.Shared/Components` are used across all platforms (Web and MAUI)
+- **Client Components** - Web-specific components in `SmartWarehouse.Web.Client/Components` that work with both Server and WebAssembly render modes
+- **Server Components** - Server-only components in `SmartWarehouse.Web/Components` (e.g., Error page requiring HttpContext)
 - **Platform-Specific Services** - Services implement shared interfaces (e.g., `IBarcodeScanner`) with platform-specific logic
 - **Dependency Injection** - Platform-specific implementations are registered at application startup
+
+#### Component Organization Strategy
+
+- **Routes Component** - Located in Client project to support InteractiveAuto render mode (works in both Server and WebAssembly modes)
+- **Web Pages** - Home, Weather, and NotFound pages are in Client project for InteractiveAuto compatibility
+- **Server Pages** - Error page remains in Server project (requires HttpContext, handled server-side)
+- **Shared Pages** - ItemEditor and Counter are in Shared project for cross-platform use
 
 ### Real-Time Synchronization
 
@@ -89,8 +99,9 @@ The application uses abstraction patterns for platform-specific features:
 
 The application leverages .NET 10 capabilities:
 
-- **PersistentState** - Automatically persists component state during server-to-client handoff, eliminating double-fetching
-- **Interactive Render Modes** - Supports both Blazor Server and WebAssembly render modes
+- **Interactive Render Modes** - Supports InteractiveAuto, InteractiveServer, and InteractiveWebAssembly render modes
+- **Component Architecture** - Properly organized components across Client, Server, and Shared projects for optimal render mode compatibility
+- **Route Discovery** - Router component in Client project discovers routes from Client and Shared assemblies, supporting both Server and WebAssembly modes
 - **Nullable Reference Types** - Type safety enabled throughout the codebase
 
 ### Architecture Diagram
@@ -103,17 +114,23 @@ graph TB
     end
     
     subgraph Shared["Shared Layer"]
-        Components["Blazor Components<br/>ItemEditor.razor"]
+        Components["Shared Components<br/>ItemEditor.razor, Counter.razor"]
+        Layout["Layout Components<br/>MainLayout, NavMenu, ReconnectModal"]
         Models["Data Models<br/>InventoryItem.cs"]
         Interfaces["Service Interfaces<br/>IBarcodeScanner<br/>IInventoryDataService"]
         Helpers["Utility Services<br/>HubUrlHelper"]
+    end
+    
+    subgraph Client["Client Project"]
+        Routes["Routes.razor<br/>(InteractiveAuto Compatible)"]
+        WebPages["Web Pages<br/>Home, Weather, NotFound"]
+        ClientServices["Client Services<br/>ApiInventoryService"]
     end
     
     subgraph Services["Platform Services"]
         MobileScanner["MobileBarcodeScanner"]
         WebScanner["WebBarcodeScanner"]
         LocalDataService["LocalInventoryService<br/>SQLite"]
-        ApiDataService["ApiInventoryService<br/>HTTP Client"]
     end
     
     subgraph Server["Server Layer"]
@@ -124,20 +141,24 @@ graph TB
     end
     
     Mobile --> Components
-    Web --> Components
+    Web --> Routes
+    Routes --> WebPages
+    Routes --> Components
+    WebPages --> Layout
+    Components --> Layout
     Components --> Models
     Components --> Interfaces
     Components --> Helpers
     Interfaces --> MobileScanner
     Interfaces --> WebScanner
     Interfaces --> LocalDataService
-    Interfaces --> ApiDataService
+    Interfaces --> ClientServices
     Mobile --> MobileScanner
     Web --> WebScanner
     Mobile --> LocalDataService
-    ApiDataService --> API
+    ClientServices --> API
     Components --> Hub
-    Components --> API
+    WebPages --> Hub
     Helpers --> Hub
     API --> DataStore
     Hub --> DataStore
@@ -350,8 +371,9 @@ SmartWarehouse/
 ├── SmartWarehouse.Web/             # Web application
 │   ├── SmartWarehouse.Web/         # Blazor Server project
 │   │   ├── Components/             # Server-side components
-│   │   │   ├── Pages/              # Web pages (Home, Weather, Error, NotFound)
-│   │   │   └── Layout/             # Layout components
+│   │   │   ├── App.razor           # Root component (Server-only)
+│   │   │   └── Pages/              # Server-only pages
+│   │   │       └── Error.razor     # Error page (requires HttpContext)
 │   │   ├── Features/               # Feature-based API endpoints
 │   │   │   └── Inventory/         # Inventory management endpoints
 │   │   │       ├── GetList/       # GET /api/inventory endpoint
@@ -363,6 +385,12 @@ SmartWarehouse/
 │   │   │   └── InventoryHub.cs     # Real-time inventory update hub
 │   │   └── Program.cs              # Web app configuration, DI, and API setup
 │   └── SmartWarehouse.Web.Client/  # Blazor WebAssembly project
+│       ├── Components/             # Client-side components
+│       │   ├── Routes.razor       # Router component (InteractiveAuto compatible)
+│       │   └── Pages/              # Web pages (InteractiveAuto compatible)
+│       │       ├── Home.razor      # Home page
+│       │       ├── Weather.razor   # Weather page
+│       │       └── NotFound.razor  # Not found page
 │       └── Services/               # Client-side services
 │           ├── WebBarcodeScanner.cs # Web barcode scanner implementation
 │           └── ApiInventoryService.cs # HTTP API client service

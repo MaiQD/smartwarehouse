@@ -1,6 +1,13 @@
 ﻿@page "/Error"
 @using System.Diagnostics
 
+@* 
+    NOTE: This is a server-only page that requires HttpContext.
+    It is NOT discoverable by the Router component in Client project.
+    Error handling is done server-side via UseExceptionHandler in Program.cs.
+    This page only works in Server render mode.
+*@
+
 <PageTitle>Error</PageTitle>
 
 <h1 class="text-danger">Error.</h1>
